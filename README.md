@@ -1,6 +1,6 @@
 # terra-fusion
-<div align="center" style="background-color: white;">
-    <img src="images/teaser.png" width="800">
+<div align="center">
+    <img src="images/teaser.png" width="800" style="background-color: white; padding: 10px; border-radius: 8px;">
 </div>
 
 ## TerraFusion: Joint Generation Terrain Geometry and Texture Using Latent Diffusion Models
