@@ -17,7 +17,6 @@ current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 # ===== Parse arguments =====
 parser = argparse.ArgumentParser()
 parser.add_argument("--output_dir", type=str, default=f"./inference_outputs/{current_time}", help="Path to output directory.")
-parser.add_argument("--model_dir", type=str, default="./models", help="Path to model directory.")
 parser.add_argument("--num_samples", type=int, default=8, help="Number of samples to generate.")
 parser.add_argument("--batch_size", type=int, default=4, help="Inference batch size.")
 parser.add_argument("--num_inference_steps", type=int, default=20, help="Number of inference steps.")
@@ -27,7 +26,6 @@ output_dir = args.output_dir
 combined_image_dir = os.path.join(output_dir, "combined") # for visualization
 texture_dir = os.path.join(output_dir, "texture") # texture (uint8, png)
 heightmap_dir = os.path.join(output_dir, "heightmap") # heightmap (int16, tif)
-model_dir = args.model_dir
 num_samples = args.num_samples
 batch_size = args.batch_size
 
@@ -39,18 +37,18 @@ prompt = "A satellite terrain image." # text prompt
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Tokenizer and TextEncoder
-tokenizer = CLIPTokenizer.from_pretrained(os.path.join(model_dir, "tokenizer"))
-text_encoder = CLIPTextModel.from_pretrained(os.path.join(model_dir, "text_encoder")).to(device)
+tokenizer = CLIPTokenizer.from_pretrained("stabilityai/stable-diffusion-2-base", subfolder="tokenizer")
+text_encoder = CLIPTextModel.from_pretrained("stabilityai/stable-diffusion-2-base", subfolder="text_encoder").to(device)
 
 # VAE
-texture_vae = AutoencoderKL.from_pretrained(os.path.join(model_dir, "texture_vae")).to(device)
-heightmap_vae = AutoencoderKL.from_pretrained(os.path.join(model_dir, "heightmap_vae")).to(device)
+texture_vae = AutoencoderKL.from_pretrained("stabilityai/stable-diffusion-2-base", subfolder="vae").to(device)
+heightmap_vae = AutoencoderKL.from_pretrained("Millennium-Nova/terrafusion-heightmap-vae").to(device)
 
 # UNet
-unet = UNet2DConditionModel.from_pretrained(os.path.join(model_dir, "unet")).to(device)
+unet = UNet2DConditionModel.from_pretrained("Millennium-Nova/uncond-terrain-ldm", subfolder="unet").to(device)
 
 # Noise scheduler
-scheduler = DDPMScheduler.from_pretrained(os.path.join(model_dir, "scheduler"))
+scheduler = DDPMScheduler.from_pretrained("Millennium-Nova/uncond-terrain-ldm", subfolder="scheduler")
 
 # ===== Initialize pipeline =====
 pipeline = TerraFusionPipeline(
