@@ -46,9 +46,9 @@ If you use this code in your research, please cite our work using the following 
     title={TerraFusion: Joint Generation of Terrain Geometry and Texture Using Latent Diffusion Models},
     author={Kazuki Higo and Toshiki Kanai and Yuki Endo and Yoshihiro Kanamori},
     journal={Virtual Reality & Intelligent Hardware Journal},
-    volume={},
-    number={},
-    pages={0-0},
+    volume={7},
+    number={6},
+    pages={560-576},
     year={2025},
 }
 ```
