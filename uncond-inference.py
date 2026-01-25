@@ -37,12 +37,12 @@ prompt = "A satellite terrain image." # text prompt
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Tokenizer and TextEncoder
-tokenizer = CLIPTokenizer.from_pretrained("stabilityai/stable-diffusion-2-base", subfolder="tokenizer")
-text_encoder = CLIPTextModel.from_pretrained("stabilityai/stable-diffusion-2-base", subfolder="text_encoder").to(device)
+tokenizer = CLIPTokenizer.from_pretrained("Millennium-Nova/uncond-terrain-ldm", subfolder="tokenizer")
+text_encoder = CLIPTextModel.from_pretrained("Millennium-Nova/uncond-terrain-ldm", subfolder="text_encoder").to(device)
 
 # VAE
-texture_vae = AutoencoderKL.from_pretrained("stabilityai/stable-diffusion-2-base", subfolder="vae").to(device)
-heightmap_vae = AutoencoderKL.from_pretrained("Millennium-Nova/terrafusion-heightmap-vae").to(device)
+texture_vae = AutoencoderKL.from_pretrained("Millennium-Nova/uncond-terrain-ldm", subfolder="texture_vae").to(device)
+heightmap_vae = AutoencoderKL.from_pretrained("Millennium-Nova/uncond-terrain-ldm", subfolder="heightmap_vae").to(device)
 
 # UNet
 unet = UNet2DConditionModel.from_pretrained("Millennium-Nova/uncond-terrain-ldm", subfolder="unet").to(device)
