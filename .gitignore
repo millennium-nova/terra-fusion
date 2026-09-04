@@ -1,3 +1,29 @@
+# Generated outputs and downloaded models
 inference_outputs/
-src/__pycache__
 models/
+sketch_result.png
+blur_comparison.png
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+
+# Local environments and editor/OS metadata
+.pixi/
+.vscode/
+.DS_Store
+
+# Virtual environments and local secrets
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Test, type-checker, and packaging artifacts
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/

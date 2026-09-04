@@ -16,22 +16,57 @@ First, clone this repository:
 git clone https://github.com/millennium-nova/terra-fusion.git
 cd terra-fusion
 ```
-Next, set up the required environment using the provided `environment.yaml` file:
+
+### Option A: Setup with pixi (Recommended)
+
+```bash
+pixi install
+```
+
+### Option B: Setup with Conda
 
 ```bash
 conda env create -f environment.yaml
 conda activate uncond-terrain-ldm
 ```
 
-Then, simply run the following command to begin:
+## Sketch-Based Inference
+
+Sketch-based inference lets you control terrain generation by providing a hand-drawn sketch.
+
+### Sketch Color Conventions
+
+| Color | Feature |
+|-------|---------|
+| 🔴 Red `(255, 0, 0)` | Valley |
+| 🟢 Green `(0, 255, 0)` | Ridge |
+| 🔵 Blue `(0, 0, 255)` | Cliff |
+
+The sketch should be drawn on a **black background**.
+
+Pre-made template sketches are provided in the `sketches/` directory.
+
+### Running Sketch-Based Inference
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python uncond-inference.py --num_samples=8 --batch_size=4
+CUDA_VISIBLE_DEVICES=0 python sketch-inference.py --sketch_image sketches/sketch3.png --num_samples=1 --batch_size=1 --seed=42
 ```
 
-This will start the inference process using GPU 0.
+### Drawing Your Own Sketches
 
-> **Note**: Sketch-based inference will be released soon.
+```bash
+python draw_sketch.py
+```
+
+
+## Unconditional Inference
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python uncond-inference.py --num_samples=8 --batch_size=4 --seed=42
+```
+
+Omit `--seed` to use a random seed. The selected seed is printed at startup so
+the run can be reproduced later.
 
 ## License
 

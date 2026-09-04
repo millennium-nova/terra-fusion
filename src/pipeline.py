@@ -3,15 +3,13 @@
 # See: https://polyformproject.org/licenses/noncommercial/1.0.0/
 import inspect
 import numpy as np
-from typing import Callable, List, Optional, Union, Tuple
+from typing import List, Optional, Union, Tuple
 
 import torch
 from diffusers import UNet2DConditionModel, AutoencoderKL
 from diffusers.pipelines.pipeline_utils import DiffusionPipeline
-from diffusers.schedulers import DDPMScheduler
 from diffusers.utils import BaseOutput
 from diffusers.utils.torch_utils import randn_tensor
-import numpy as np
 from dataclasses import dataclass
 
 class LatentDiffusionPipelineBase(DiffusionPipeline):
