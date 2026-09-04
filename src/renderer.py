@@ -69,6 +69,38 @@ def _fit_parallel_camera(plotter, points, elevation=35, azimuth=45, padding=1.04
     plotter.reset_camera_clipping_range()
 
 
+def build_terrain_mesh(texture_uint8, heightmap_int16, resolution=512):
+    """Build a textured terrain grid using the renderer's preprocessing."""
+    if texture_uint8.shape[:2] != heightmap_int16.shape:
+        raise ValueError(
+            "Texture and heightmap dimensions must match, but got "
+            f"{texture_uint8.shape[:2]} and {heightmap_int16.shape}."
+        )
+
+    height, width = heightmap_int16.shape
+    step = max(1, min(height, width) // resolution)
+    h_down = heightmap_int16[::step, ::step].astype(np.float32)
+    tex_down = texture_uint8[::step, ::step]
+    down_height, down_width = h_down.shape
+
+    p2 = np.percentile(h_down, 2)
+    p98 = np.percentile(h_down, 98)
+    if p98 > p2:
+        h_norm = np.clip((h_down - p2) / (p98 - p2), 0, 1)
+    else:
+        h_norm = np.zeros_like(h_down)
+
+    h_norm = scipy.ndimage.uniform_filter(h_norm, size=13)
+    z = h_norm * (max(down_height, down_width) * 0.2)
+
+    x = np.arange(down_width, dtype=np.float32)
+    y = np.arange(down_height - 1, -1, -1, dtype=np.float32)
+    x, y = np.meshgrid(x, y)
+    grid = pv.StructuredGrid(x, y, z)
+    grid.point_data["RGB"] = tex_down.transpose(1, 0, 2).reshape(-1, 3)
+    return grid
+
+
 def render_terrain_3d(texture_uint8, heightmap_int16, output_path, resolution=512):
     """
     Generate a 3D isometric view of the terrain and save it as an image.
@@ -82,46 +114,7 @@ def render_terrain_3d(texture_uint8, heightmap_int16, output_path, resolution=51
         output_path: Path to save the rendered image
         resolution: Target resolution for rendering (downsampled for speed)
     """
-    H, W = heightmap_int16.shape
-
-    # Calculate downsampling factor
-    step = max(1, min(H, W) // resolution)
-
-    # Downsample
-    h_down = heightmap_int16[::step, ::step].astype(np.float32)
-    tex_down = texture_uint8[::step, ::step]  # keep uint8 (texture remains untouched/sharp)
-
-    dH, dW = h_down.shape
-
-    # Percentile normalization for height
-    p2 = np.percentile(h_down, 2)
-    p98 = np.percentile(h_down, 98)
-    if p98 > p2:
-        h_norm = np.clip((h_down - p2) / (p98 - p2), 0, 1)
-    else:
-        h_norm = np.zeros_like(h_down)
-
-    # Smooth only the normalized heightmap used by the 3D renderer.
-    h_norm = scipy.ndimage.uniform_filter(h_norm, size=13)
-
-    # Scale height for visualization
-    z_exaggeration = 0.2
-    Z = h_norm * (max(dH, dW) * z_exaggeration)
-
-    # --- Build PyVista StructuredGrid ---
-    # Create coordinate arrays: X (columns), Y (rows), Z (height)
-    x = np.arange(dW, dtype=np.float32)
-    # Invert Y axis so that image row 0 (top) maps to the maximum Y coordinate in 3D
-    y = np.arange(dH-1, -1, -1, dtype=np.float32) 
-    X, Y = np.meshgrid(x, y)
-
-    # PyVista StructuredGrid expects (nZ, nY, nX) point ordering, flattening in Fortran order.
-    grid = pv.StructuredGrid(X, Y, Z)
-
-    # Assign texture as RGB point data
-    # Transpose tex_down to (dW, dH, 3) so that C-order flattening matches PyVista's F-order flattening of X/Y/Z
-    rgb_flat = tex_down.transpose(1, 0, 2).reshape(-1, 3)
-    grid.point_data["RGB"] = rgb_flat
+    grid = build_terrain_mesh(texture_uint8, heightmap_int16, resolution)
 
     # --- Render off-screen ---
     # Use a rectangular (landscape) viewport for better framing of the isometric terrain
@@ -148,7 +141,8 @@ def render_terrain_3d(texture_uint8, heightmap_int16, output_path, resolution=51
 
     # Add a directional light from upper-left (azimuth=315°, altitude=45°)
     center = grid.center
-    diag = max(dW, dH)
+    bounds = grid.bounds
+    diag = max(bounds[1] - bounds[0], bounds[3] - bounds[2])
     light = pv.Light(
         position=(
             center[0] - diag,

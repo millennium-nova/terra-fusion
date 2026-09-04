@@ -68,6 +68,17 @@ CUDA_VISIBLE_DEVICES=0 python uncond-inference.py --num_samples=8 --batch_size=4
 Omit `--seed` to use a random seed. The selected seed is printed at startup so
 the run can be reproduced later.
 
+## Mesh Export
+
+Convert a generated heightmap and texture into a triangle mesh with vertex colors:
+
+```bash
+python export-mesh.py \
+  --heightmap inference_outputs/<run>/heightmap/heightmap_000000.tif \
+  --texture inference_outputs/<run>/texture/texture_000000.png \
+  --output terrain.ply
+```
+
 ## License
 
 This project is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE).

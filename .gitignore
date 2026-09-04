@@ -2,6 +2,8 @@
 inference_outputs/
 models/
 sketch_result.png
+terrain.ply
+terrain.vtp
 blur_comparison.png
 
 # Python bytecode and caches

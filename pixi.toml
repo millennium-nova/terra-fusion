@@ -12,6 +12,7 @@ cuda = "12.8"
 uncond-infer = "python uncond-inference.py"
 sketch-infer = "python sketch-inference.py"
 draw-sketch = "python draw_sketch.py"
+export-mesh = "python export-mesh.py"
 
 [dependencies]
 python = "3.10.*"
